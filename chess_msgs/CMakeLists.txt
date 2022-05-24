@@ -20,6 +20,7 @@ set(msg_files
 
 set(srv_files
   srv/GetNextMove.srv
+  srv/SetEloRating.srv
 )
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${msg_files}

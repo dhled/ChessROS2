@@ -28,10 +28,18 @@ class StockFishROS(Node):
     def __init__(self, node_name="stockfish_node"):
         super().__init__(node_name)
         self._stockfish = stockfish.Stockfish(depth=18)
-        self._get_move_played = self.create_subscription(String, "played_move", self._move_played_cb, 10)
-        self._get_next_move_srv = self.create_service(GetNextMove, "get_next_move", self._get_next_move_cb)
-        self._set_skill_level_srv = self.create_service(SetEloRating, "set_elo_rating", self._set_elo_rating)
-        self._reset_game = self.create_service(Empty, "reset_game", self._reset_game)
+        self._get_move_played = self.create_subscription(
+            String, "played_move", self._move_played_cb, 10
+        )
+        self._get_next_move_srv = self.create_service(
+            GetNextMove, "get_next_move", self._get_next_move_cb
+        )
+        self._set_skill_level_srv = self.create_service(
+            SetEloRating, "set_elo_rating", self._set_elo_rating
+        )
+        self._reset_game = self.create_service(
+            Empty, "reset_game", self._reset_game
+        )
 
     def _move_played_cb(self, msg):
         self.get_logger().info("Received move %s" % msg.data)
@@ -41,6 +49,25 @@ class StockFishROS(Node):
         move = self._stockfish.get_best_move_time(1000)
         self.get_logger().info("My next move %s" % move)
         response.move = move
+        type = self._stockfish.will_move_be_a_capture("move")
+        if type == stockfish.Capture.DIRECT_CAPTURE:
+            type = "capture"
+        elif type == stockfish.Capture.EN_PASSANT:
+            type = "en_passant"
+        elif type == stockfish.Capture.NO_CAPTURE:
+            m_P1 = move[0:1]
+            m_P2 = move[2:3]
+            p1 = self._stockfish.get_what_is_on_square(m_P1)
+            p2 = self._stockfish.get_what_is_on_square(m_P2)
+            if (
+                p1 is stockfish.Piece.BLACK_KING
+                and m_P1 == "e8"
+                and (m_P2 == "g8" or m_P2 == "c8")
+            ):
+                type = "roque"
+            else:
+                type = "no_capture"
+        response.type = type
         return response
 
     def _set_elo_rating(self, request, response):

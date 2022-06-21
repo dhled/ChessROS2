@@ -15,7 +15,7 @@ find_package(builtin_interfaces REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 set(msg_files
-  
+  msg/ChessMove.msg
 )
 
 set(srv_files

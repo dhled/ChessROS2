@@ -1,3 +1,2 @@
 ---
-string move
-string type
+chess_msgs/ChessMove move

@@ -41,20 +41,20 @@ class StockFishROS(Node):
         move = self._stockfish.get_best_move_time(1000)
         self.get_logger().info("My next move %s" % move)
         response.move.move = move
-        type = self._stockfish.will_move_be_a_capture(move)
-        if type == stockfish.Stockfish.Capture.DIRECT_CAPTURE:
-            type = "capture"
-        elif type == stockfish.Stockfish.Capture.EN_PASSANT:
-            type = "en_passant"
-        elif type == stockfish.Stockfish.Capture.NO_CAPTURE:
+        type_ = self._stockfish.will_move_be_a_capture(move)
+        if type_ == stockfish.Stockfish.Capture.DIRECT_CAPTURE:
+            type_ = "capture"
+        elif type_ == stockfish.Stockfish.Capture.EN_PASSANT:
+            type_ = "en_passant"
+        elif type_ == stockfish.Stockfish.Capture.NO_CAPTURE:
             m_P1 = move[:2]
             m_P2 = move[2:]
             p1 = self._stockfish.get_what_is_on_square(m_P1)
             if p1 is stockfish.Stockfish.Piece.BLACK_KING and m_P1 == "e8" and (m_P2 == "g8" or m_P2 == "c8"):
-                type = "roque"
+                type_ = "roque"
             else:
-                type = "no_capture"
-        response.move.type = type
+                type_ = "no_capture"
+        response.move.type = type_
         return response
 
     def _set_elo_rating(self, request, response):
